@@ -1,0 +1,9 @@
+mnist_train.csv
+mnist_testgit .csv
+__pycache__/
+*.py[cod]
+
+# Distribution
+*$py.class
+.Python
+env/
