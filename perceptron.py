@@ -1,22 +1,23 @@
 import numpy as np
 import time
 
+
 class Perceptron(object):
 	# create file that stores the results of training predictions between epochs
 	directory = './save/{}'.format(time.ctime().replace(' ', '-'))
 	file = directory + '/{}'
 
 	def __init__(self,
-	             learning_rate,
-	             data_class_count,
-	             training_data,
-	             training_count,
-	             training_labels_matrix,
-	             test_data,
-	             test_data_size,
-	             test_labels_matrix,
-	             initial_weights,
-	             epochs):
+				 learning_rate,
+				 data_class_count,
+				 training_data,
+				 training_count,
+				 training_labels_matrix,
+				 test_data,
+				 test_data_size,
+				 test_labels_matrix,
+				 initial_weights,
+				 epochs):
 		"""
 			Args:
 				data_class_count: Number of data classes
@@ -37,7 +38,7 @@ class Perceptron(object):
 		"""
 		self.learning_rate = learning_rate
 		self.data_class_count = data_class_count
-		self.input_node_count = initial_weights.shape[0]  #should be 785
+		self.input_node_count = initial_weights.shape[0]  # should be 785
 		_training_bias_col = np.ones((training_data.shape[0], 1))
 		self.training_data = np.append(training_data, _training_bias_col, axis=1)
 		self.training_data_size = training_count
@@ -51,7 +52,6 @@ class Perceptron(object):
 		self.epochs = epochs
 		self.training_confusion_matrix = np.zeros((self.data_class_count, self.data_class_count))
 		self.test_confusion_matrix = np.zeros((self.data_class_count, self.data_class_count))
-
 
 		if self.weights.shape[0] != self.training_data.shape[1]:
 			print("weight rows: ", self.weights.shape[0])
@@ -73,8 +73,8 @@ class Perceptron(object):
 			returns the activation vector and the predicted class(in 10d vector form) for the training data
 
 		"""
-		data_values = np.reshape(data_inputs_arr, (self.input_node_count, 1))  #converts to [n, 1] matrix
-		_output_vector = np.dot( data_values.T,  self.weights)
+		data_values = np.reshape(data_inputs_arr, (self.input_node_count, 1))  # converts to [n, 1] matrix
+		_output_vector = np.dot(data_values.T, self.weights)
 		return np.where(_output_vector > 0, 1, 0), np.argmax(_output_vector)
 
 	def update_weights(self, activation, target, training_data_element):
@@ -111,24 +111,26 @@ class Perceptron(object):
 		for i in range(self.epochs):
 			self.train_for_cycle()
 
-			 #predict on training set
+			# predict on training set
 			for element_index in range(self.training_data_size):
 				_training_actual = self.prediction(self.training_data[element_index])[1]
-				_training_target = np.where(self.training_labels[element_index] == 1)[0] #expected class as int
+				_training_target = np.where(self.training_labels[element_index] == 1)[0]  # expected class as int
+
 				self.training_confusion_matrix[_training_target, _training_actual] += 1
 
-			#predict on test set
+			# predict on test set
 			for element_index in range(self.test_data_size):
 				_test_actual = self.prediction(self.test_data[element_index])[1]
-				_test_target = np.where(self.test_labels[element_index]==1)[0]
-				self.test_confusion_matrix[_test_actual, _test_target] += 1
+				_test_target = np.where(self.test_labels[element_index] == 1)[0]
+				self.test_confusion_matrix[_test_target, _test_actual] += 1
+				print("test target: ", _test_target, "test actual: ", _test_actual)
 
 			_curr_training_accuracy = self.compute_accuracy(self.training_confusion_matrix)
 			print("training acc for ", self.learning_rate, " epoch ", i, ": ", _curr_training_accuracy)
+
 			_test_accuracy = self.compute_accuracy(self.test_confusion_matrix)
 			print("test acc for ", self.learning_rate, " epoch ", i, ": ", _test_accuracy)
 
-			#TODO: plot accuracy
 
 			if _curr_training_accuracy - prev_accuracy < 0.01:
 				return i, _curr_training_accuracy, _test_accuracy
@@ -138,7 +140,7 @@ class Perceptron(object):
 	def train_for_cycle(self):
 		for i in range(0, self.training_data.shape[0]):
 			training_data_element = self.training_data[i]
-			_activation, _actual = self.prediction(self.training_data[i])  #replace with data
+			_activation, _actual = self.prediction(self.training_data[i])  # replace with data
 			_target = self.training_labels[i]
 			if _target[_actual] != 1:
 				self.update_weights(_activation, _target, training_data_element)
@@ -152,4 +154,4 @@ class Perceptron(object):
 		np.trace sums the diagonal values in a matrix.
 		"""
 		# print(confusion_matrix)
-		return np.trace(confusion_matrix)/ np.sum(confusion_matrix)
+		return np.trace(confusion_matrix) / np.sum(confusion_matrix)
