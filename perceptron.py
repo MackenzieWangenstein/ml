@@ -65,6 +65,17 @@ class Perceptron(object):
 			raise Exception("The number of columns in the training data matrix does not match the number of columns " +
 							"in the test data matrix")
 
+	def predict_all(self, data_inputs_matrix):
+		"""
+			returns:
+				activation_matrix: holds an activation_vectors for each data example
+				prediction_matrix: holds the real predictions for each class
+			activations_matrix shape: [n x 10] matrix where x is the number of data examples
+		"""
+		_output_matrix = np.dot(data_inputs_matrix, self.weights)
+
+		return np.where(_output_matrix > 0, 1, 0), _output_matrix
+
 	def prediction(self, data_inputs_arr):
 		"""
 			Args:
@@ -73,7 +84,7 @@ class Perceptron(object):
 			returns the activation vector and the predicted class(in 10d vector form) for the training data
 
 		"""
-		data_values = np.reshape(data_inputs_arr, (self.input_node_count, 1))  # converts to [n, 1] matrix
+		data_values = np.reshape(data_inputs_arr, (self.input_node_count, 1))  # converts to [n, 1] matrix - unnecessary
 		_output_vector = np.dot(data_values.T, self.weights)
 		return np.where(_output_vector > 0, 1, 0), np.argmax(_output_vector)
 
@@ -103,27 +114,25 @@ class Perceptron(object):
 		:return: number of training cycles the perceptron trained for, return accuracies for test and training sets
 		"""
 		self.actual_training_cycles = 0
-		prev_accuracy = 0;
+		prev_training_accuracy = 0;
 
-		# self.training_confusion_matrix = np.zeros((self.data_class_count, self.data_class_count))
-		# self.test_confusion_matrix = np.zeros((self.data_class_count, self.data_class_count))
 		print("Training perceptron with learning rate of ", self.learning_rate)
 		for i in range(self.epochs):
 			self.train_for_cycle()
 
 			# predict on training set
+			training_input_activations, training_predictions = self.predict_all(self.training_data)
 			for element_index in range(self.training_data_size):
-				_training_actual = self.prediction(self.training_data[element_index])[1]
+				_training_actual = np.argmax(training_predictions[element_index])
 				_training_target = np.where(self.training_labels[element_index] == 1)[0]  # expected class as int
-
 				self.training_confusion_matrix[_training_target, _training_actual] += 1
 
 			# predict on test set
+			test_input_activations, test_predictions = self.predict_all(self.test_data)
 			for element_index in range(self.test_data_size):
-				_test_actual = self.prediction(self.test_data[element_index])[1]
+				_test_actual = np.argmax(test_predictions[element_index])
 				_test_target = np.where(self.test_labels[element_index] == 1)[0]
 				self.test_confusion_matrix[_test_target, _test_actual] += 1
-				print("test target: ", _test_target, "test actual: ", _test_actual)
 
 			_curr_training_accuracy = self.compute_accuracy(self.training_confusion_matrix)
 			print("training acc for ", self.learning_rate, " epoch ", i, ": ", _curr_training_accuracy)
@@ -131,9 +140,10 @@ class Perceptron(object):
 			_test_accuracy = self.compute_accuracy(self.test_confusion_matrix)
 			print("test acc for ", self.learning_rate, " epoch ", i, ": ", _test_accuracy)
 
-
-			if _curr_training_accuracy - prev_accuracy < 0.01:
+			#return if training accuracy does not improve by more than 1% between epochs
+			if _curr_training_accuracy - prev_training_accuracy < 0.01:
 				return i, _curr_training_accuracy, _test_accuracy
+			prev_training_accuracy = _curr_training_accuracy
 
 		return self.epochs, _curr_training_accuracy, _test_accuracy
 

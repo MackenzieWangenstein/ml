@@ -4,7 +4,7 @@ import numpy as np
 from perceptron import Perceptron
 
 data_class_count = 10;
-epochs = 3  # TODO: replace with 70
+epochs = 2 # TODO: replace with 70
 n1 = 0.001
 n2 = 0.01
 n3 = 0.1
