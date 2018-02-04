@@ -40,12 +40,10 @@ class Perceptron(object):
 		self.learning_rate = learning_rate
 		self.data_class_count = data_class_count
 		self.input_node_count = initial_weights.shape[0]  # should be 785
-		_training_bias_col = np.ones((training_data.shape[0], 1))
-		self.training_data = np.append(training_data, _training_bias_col, axis=1)
+		self.training_data = training_data
 		self.training_data_size = training_count
 		self.training_labels = training_labels_matrix
-		_test_bias_col = np.ones((test_data.shape[0], 1))
-		self.test_data = np.append(test_data, _test_bias_col, axis=1)
+		self.test_data = test_data
 		self.test_data_size = test_data_size
 		self.test_labels = test_labels_matrix
 		self.weights = initial_weights
@@ -66,17 +64,6 @@ class Perceptron(object):
 			raise Exception("The number of columns in the training data matrix does not match the number of columns " +
 
 							"in the test data matrix")
-	# TODO: remove
-	# def predict_all(self, data_inputs_matrix):
-	# 	"""
-	# 		returns:
-	# 			activation_matrix: holds an activation_vectors for each data example
-	# 			prediction_matrix: holds the real predictions for each class
-	# 		activations_matrix shape: [n x 10] matrix where x is the number of data examples
-	# 	"""
-	# 	_output_matrix = np.dot(data_inputs_matrix, self.weights)
-	#
-	# 	return np.where(_output_matrix > 0, 1, 0), _output_matrix
 
 	def prediction(self, data_inputs_arr):
 		"""
