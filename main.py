@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+from hw1 import perceptronrunner
 
-from perceptron import Perceptron
+from hw1 import perceptron
 
 data_class_count = 10;
-epochs = 2 # TODO: replace with 70
+epochs = 2  # TODO: replace with 70
 n1 = 0.001
 n2 = 0.01
 n3 = 0.1
@@ -38,21 +39,31 @@ for j in range(_test_data_size):
 _rand_weights = np.random.uniform(low=-0.5, high=0.5,
 								  size=(_training_data.shape[1] + 1, 10))  # include weight for bias
 
-p1 = Perceptron(n1, data_class_count, _training_data, _training_data_size, _training_labels_matrix, _test_data,
-				_test_data_size, _test_labels_matrix, _rand_weights, epochs)
-p2 = Perceptron(n2, data_class_count, _training_data, _training_data_size, _training_labels_matrix, _test_data,
-				_test_data_size, _test_labels_matrix, _rand_weights, epochs)
-p3 = Perceptron(n3, data_class_count, _training_data, _training_data_size, _training_labels_matrix, _test_data,
-				_test_data_size, _test_labels_matrix, _rand_weights, epochs)
+perceptronrunner.run_perceptron(_training_data, _training_data_size, _training_labels_matrix, _test_data,
+								_test_data_size, _test_labels_matrix, _rand_weights, )
 
-p1_epochs_ran, p1_training_accuracy, p1_test_accuracy = p1.run()
-print("Perceptron of learning rate ", n1, " had a final training accuracy of ", p1_training_accuracy, " and a test",
-	  " accuracy of ", p1_test_accuracy, "after ", p1_epochs_ran, " epochs")
-
-p2_epochs_ran, p2_training_accuracy, p2_test_accuracy = p2.run()
-print("Perceptron of learning rate ", n2, " had a final training accuracy of ", p2_training_accuracy, " and a test",
-	  " accuracy of ", p1_test_accuracy, " after ", p2_epochs_ran, " epochs")
-
-p3_epochs_ran, p3_training_accuracy, p3_test_accuracy = p3.run()
-print("Perceptron of learning rate ", n3, " had a final training accuracy of ", p3_training_accuracy, " and a test",
-	  " accuracy of ", p1_test_accuracy, " after ", p3_epochs_ran, " epochs")
+##TODO: add logic to allow developer to pass command line option to choose which to run
+#
+#
+# p1 = Perceptron(n1, data_class_count, _training_data, _training_data_size, _training_labels_matrix, _test_data,
+# 				_test_data_size, _test_labels_matrix, _rand_weights, epochs)
+# p2 = Perceptron(n2, data_class_count, _training_data, _training_data_size, _training_labels_matrix, _test_data,
+# 				_test_data_size, _test_labels_matrix, _rand_weights, epochs)
+# p3 = Perceptron(n3, data_class_count, _training_data, _training_data_size, _training_labels_matrix, _test_data,
+# 				_test_data_size, _test_labels_matrix, _rand_weights, epochs)
+#
+#
+#
+#
+#
+# p1_epochs_ran, p1_training_accuracy, p1_test_accuracy = p1.run()
+# print("Perceptron of learning rate ", n1, " had a final training accuracy of ", p1_training_accuracy, " and a test",
+# 	  " accuracy of ", p1_test_accuracy, "after ", p1_epochs_ran, " epochs")
+#
+# p2_epochs_ran, p2_training_accuracy, p2_test_accuracy = p2.run()
+# print("Perceptron of learning rate ", n2, " had a final training accuracy of ", p2_training_accuracy, " and a test",
+# 	  " accuracy of ", p1_test_accuracy, " after ", p2_epochs_ran, " epochs")
+#
+# p3_epochs_ran, p3_training_accuracy, p3_test_accuracy = p3.run()
+# print("Perceptron of learning rate ", n3, " had a final training accuracy of ", p3_training_accuracy, " and a test",
+# 	  " accuracy of ", p1_test_accuracy, " after ", p3_epochs_ran, " epochs")

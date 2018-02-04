@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import perceptron_utility as putil
 
 
 class Perceptron(object):
@@ -63,18 +64,19 @@ class Perceptron(object):
 			print("training cols: ", self.training_data.shape[1])
 			print("test col cols: ", self.test_data.shape[1])
 			raise Exception("The number of columns in the training data matrix does not match the number of columns " +
+
 							"in the test data matrix")
-
-	def predict_all(self, data_inputs_matrix):
-		"""
-			returns:
-				activation_matrix: holds an activation_vectors for each data example
-				prediction_matrix: holds the real predictions for each class
-			activations_matrix shape: [n x 10] matrix where x is the number of data examples
-		"""
-		_output_matrix = np.dot(data_inputs_matrix, self.weights)
-
-		return np.where(_output_matrix > 0, 1, 0), _output_matrix
+	# TODO: remove
+	# def predict_all(self, data_inputs_matrix):
+	# 	"""
+	# 		returns:
+	# 			activation_matrix: holds an activation_vectors for each data example
+	# 			prediction_matrix: holds the real predictions for each class
+	# 		activations_matrix shape: [n x 10] matrix where x is the number of data examples
+	# 	"""
+	# 	_output_matrix = np.dot(data_inputs_matrix, self.weights)
+	#
+	# 	return np.where(_output_matrix > 0, 1, 0), _output_matrix
 
 	def prediction(self, data_inputs_arr):
 		"""
@@ -88,59 +90,60 @@ class Perceptron(object):
 		_output_vector = np.dot(data_values.T, self.weights)
 		return np.where(_output_vector > 0, 1, 0), np.argmax(_output_vector)
 
-	def update_weights(self, activation, target, training_data_element):
-		"""
-			new_weight = old_weight - learning_param*(actual - target) * input_value
-			Wij = Wij - n * (Yj - Tj) * Xi
-
-			weights shape :  785 rows(input nodes) x 10 rows(# of output nodes); Wij yields weight value
-			training_date shape: 1 row x 748 columns
-			activation, target shapes = [1x10]
-
-			updates all weights for all output nodes at the same time
-			requires us to change shape of training data from [1, 785] to [785, 1]
-
-			[785, 1] * [1, x 10] gives a matrix of [785, 10]
-
-			reshaping training_Data_element acts like a tranpspose
-		"""
-		training_data_element = np.reshape(training_data_element, (self.input_node_count, 1))
-		self.weights -= self.learning_rate * np.dot(training_data_element, (activation - target))
+	#//TODO: keep or remove
+	# def update_weights(self, activation, target, training_data_element):
+	# 	"""
+	# 		new_weight = old_weight - learning_param*(actual - target) * input_value
+	# 		Wij = Wij - n * (Yj - Tj) * Xi
+	#
+	# 		weights shape :  785 rows(input nodes) x 10 rows(# of output nodes); Wij yields weight value
+	# 		training_date shape: 1 row x 748 columns
+	# 		activation, target shapes = [1x10]
+	#
+	# 		updates all weights for all output nodes at the same time
+	# 		requires us to change shape of training data from [1, 785] to [785, 1]
+	#
+	# 		[785, 1] * [1, x 10] gives a matrix of [785, 10]
+	#
+	# 		reshaping training_Data_element acts like a tranpspose
+	# 	"""
+	# 	training_data_element = np.reshape(training_data_element, (self.input_node_count, 1))
+	# 	self.weights -= self.learning_rate * np.dot(training_data_element, (activation - target))
 
 	def run(self):
 		"""
-			train perceptron for n cycles or until accuracy difference between cycles is less than 1%
+			train hw1 for n cycles or until accuracy difference between cycles is less than 1%
 			where n = number of epochs
-		:return: number of training cycles the perceptron trained for, return accuracies for test and training sets
+		:return: number of training cycles the hw1 trained for, return accuracies for test and training sets
 		"""
 		self.actual_training_cycles = 0
 		prev_training_accuracy = 0;
 
-		print("Training perceptron with learning rate of ", self.learning_rate)
+		print("Training hw1 with learning rate of ", self.learning_rate)
 		for i in range(self.epochs):
 			self.train_for_cycle()
 
 			# predict on training set
-			training_input_activations, training_predictions = self.predict_all(self.training_data)
+			training_input_activations, training_predictions = putil.predict_all(self.training_data, self.weights)
 			for element_index in range(self.training_data_size):
 				_training_actual = np.argmax(training_predictions[element_index])
 				_training_target = np.where(self.training_labels[element_index] == 1)[0]  # expected class as int
 				self.training_confusion_matrix[_training_target, _training_actual] += 1
 
 			# predict on test set
-			test_input_activations, test_predictions = self.predict_all(self.test_data)
+			test_input_activations, test_predictions = putil.predict_all(self.test_data, self.weights)
 			for element_index in range(self.test_data_size):
 				_test_actual = np.argmax(test_predictions[element_index])
 				_test_target = np.where(self.test_labels[element_index] == 1)[0]
 				self.test_confusion_matrix[_test_target, _test_actual] += 1
 
-			_curr_training_accuracy = self.compute_accuracy(self.training_confusion_matrix)
+			_curr_training_accuracy = putil.compute_accuracy(self.training_confusion_matrix)
 			print("training acc for ", self.learning_rate, " epoch ", i, ": ", _curr_training_accuracy)
 
-			_test_accuracy = self.compute_accuracy(self.test_confusion_matrix)
+			_test_accuracy = putil.compute_accuracy(self.test_confusion_matrix)
 			print("test acc for ", self.learning_rate, " epoch ", i, ": ", _test_accuracy)
 
-			#return if training accuracy does not improve by more than 1% between epochs
+			# return if training accuracy does not improve by more than 1% between epochs
 			if _curr_training_accuracy - prev_training_accuracy < 0.01:
 				return i, _curr_training_accuracy, _test_accuracy
 			prev_training_accuracy = _curr_training_accuracy
@@ -149,19 +152,15 @@ class Perceptron(object):
 
 	def train_for_cycle(self):
 		for i in range(0, self.training_data.shape[0]):
-			training_data_element = self.training_data[i]
+			_training_data_element = self.training_data[i]
 			_activation, _actual = self.prediction(self.training_data[i])  # replace with data
 			_target = self.training_labels[i]
 			if _target[_actual] != 1:
-				self.update_weights(_activation, _target, training_data_element)
+				self.weights = putil.update_weights(_activation,
+													_target,
+													_training_data_element,
+													self.weights,
+													self.learning_rate,
+													self.input_node_count)
+			# self.update_weights(_activation, _target, training_data_element) TODO: keep or remove
 
-	def compute_accuracy(self, confusion_matrix):
-		"""
-		computes the accuracy of the perceptron predictions for the data set associated with the confusion matrix
-		accuracy = sum of diagonals in confusion matrix / sum of all elements in confusion matrix
-
-		Notes:
-		np.trace sums the diagonal values in a matrix.
-		"""
-		# print(confusion_matrix)
-		return np.trace(confusion_matrix) / np.sum(confusion_matrix)
