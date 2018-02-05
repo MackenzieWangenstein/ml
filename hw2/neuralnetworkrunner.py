@@ -9,8 +9,8 @@ def run_neural_network(training_data,
 					   test_data,
 					   test_data_size,
 					   test_labels,
-					   rand_weights):
-	data_class_count = rand_weights.shape[1];
+					   data_class_count):
+	print("data class count", data_class_count)
 	learning_rate = 0.1
 	epochs = 50
 	hidden_nodes1 = 20;
@@ -28,5 +28,6 @@ def run_neural_network(training_data,
 		test_labels_matrix[j][_test_target_output] = 0.9
 
 	nn1 = NeuralNet(hidden_nodes1, learning_rate, data_class_count, training_data, training_data_size,
-					training_labels_matrix,
-					test_data, test_data_size, test_labels_matrix, rand_weights, epochs)
+					training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs)
+
+	nn1.run()

@@ -1,13 +1,8 @@
 import numpy as np
-import time
-import perceptron_utility as putil
+import perceptronutility as putil
 
 
 class Perceptron(object):
-	# create file that stores the results of training predictions between epochs
-	directory = './save/{}'.format(time.ctime().replace(' ', '-'))
-	file = directory + '/{}'
-
 	def __init__(self,
 				 learning_rate,
 				 data_class_count,
@@ -77,7 +72,7 @@ class Perceptron(object):
 		_output_vector = np.dot(data_values.T, self.weights)
 		return np.where(_output_vector > 0, 1, 0), np.argmax(_output_vector)
 
-	#//TODO: keep or remove
+	# //TODO: keep or remove
 	# def update_weights(self, activation, target, training_data_element):
 	# 	"""
 	# 		new_weight = old_weight - learning_param*(actual - target) * input_value
@@ -105,37 +100,44 @@ class Perceptron(object):
 		"""
 		self.actual_training_cycles = 0
 		prev_training_accuracy = 0;
+		epoch_results = dict()
 
 		print("Training hw1 with learning rate of ", self.learning_rate)
 		for i in range(self.epochs):
 			self.train_for_cycle()
 
 			# predict on training set
-			training_input_activations, training_predictions = putil.predict_all(self.training_data, self.weights)
+			training_predictions = putil.predict_all(self.training_data, self.weights)
 			for element_index in range(self.training_data_size):
 				_training_actual = np.argmax(training_predictions[element_index])
 				_training_target = np.where(self.training_labels[element_index] == 1)[0]  # expected class as int
 				self.training_confusion_matrix[_training_target, _training_actual] += 1
 
 			# predict on test set
-			test_input_activations, test_predictions = putil.predict_all(self.test_data, self.weights)
+			test_predictions = putil.predict_all(self.test_data, self.weights)
 			for element_index in range(self.test_data_size):
 				_test_actual = np.argmax(test_predictions[element_index])
 				_test_target = np.where(self.test_labels[element_index] == 1)[0]
 				self.test_confusion_matrix[_test_target, _test_actual] += 1
 
 			_curr_training_accuracy = putil.compute_accuracy(self.training_confusion_matrix)
-			print("training acc for ", self.learning_rate, " epoch ", i, ": ", _curr_training_accuracy)
-
 			_test_accuracy = putil.compute_accuracy(self.test_confusion_matrix)
-			print("test acc for ", self.learning_rate, " epoch ", i, ": ", _test_accuracy)
 
-			# return if training accuracy does not improve by more than 1% between epochs
-			if _curr_training_accuracy - prev_training_accuracy < 0.01:
-				return i, _curr_training_accuracy, _test_accuracy
+			# record training and test accuracy for this epoch  -- source: Andy Keene
+			epoch_results[i] = {
+				'train': _curr_training_accuracy,
+				'test': _test_accuracy
+			}
+
+			# return if training accuracy does not improve by more than .1% between epochs
+			if _curr_training_accuracy - prev_training_accuracy < 0.0000001:
+				print("training accuracy", _curr_training_accuracy)
+				print("previous training accuracy", prev_training_accuracy)
+				return i, _curr_training_accuracy, _test_accuracy, {'accuracy': epoch_results}, self.test_confusion_matrix
+
 			prev_training_accuracy = _curr_training_accuracy
 
-		return self.epochs, _curr_training_accuracy, _test_accuracy
+		return self.epochs, _curr_training_accuracy, _test_accuracy, {'accuracy': epoch_results}, self.test_confusion_matrix
 
 	def train_for_cycle(self):
 		for i in range(0, self.training_data.shape[0]):
@@ -150,4 +152,3 @@ class Perceptron(object):
 													self.learning_rate,
 													self.input_node_count)
 			# self.update_weights(_activation, _target, training_data_element) TODO: keep or remove
-
