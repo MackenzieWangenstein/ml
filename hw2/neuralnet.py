@@ -56,9 +56,11 @@ class NeuralNet(object):
 
 		# for each
 		for i in range(2):  # for each training example  #self.training_data[0]) --todo: replace
-			_hidden_activations, _output_activations = self.forward_propogate(self.training_data[i])
-			print("in run")
-		# calculate error terms at each output unit
+			_hidden_sig_activation, _output_sig_activation = self.forward_propogate(self.training_data[i])
+			print("hidden sig activation for data example ", i, " : ", _hidden_sig_activation)
+			print("output sig activation for data example ", i, " : ", _output_sig_activation)
+
+	# calculate error terms at each output unit
 		# update weightgs
 
 	# def output_errors(self, actual_output):
@@ -80,14 +82,8 @@ class NeuralNet(object):
 
 		# [1 x (20hidden nodes + 1bias)] * [(20 hidden nodes + 1bias) x 10 output nodes] = [1 x 10 ]
 		# each col is activation for output node k
-		# print("output weights:\n", self.output_layer_weights)
-		print("output weights shape:", self.output_layer_weights.shape)
 
 		output_layer_activations = np.dot(hidden_layer_sigmoids, self.output_layer_weights)
-		print("output layer activations shape: ", output_layer_activations.shape)
-		print("output layer activations\n", output_layer_activations)
 		output_layer_sigmoids = putil.sigmoid_activation(output_layer_activations)
-		print("output layer sigmoids:\n", output_layer_sigmoids)
 
-		# determine error for each output unit -
 		return hidden_layer_sigmoids, output_layer_sigmoids  # TODO: sigmoid activations right?
