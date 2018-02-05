@@ -60,7 +60,7 @@ class NeuralNet(object):
 			#update weightgs
 
 
-	def output_errors(self, actual_output):
+	# def output_errors(self, actual_output):
 	def forward_propogate(self):
 		#[60k examples, 785 input values] * [785input values, 20 hidden nodes]  = 60k x 20 activations] each column
 		#represents the activation value for node k
