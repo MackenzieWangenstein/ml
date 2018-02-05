@@ -8,7 +8,7 @@ print("loading training data")
 _training_dataset_combined = pd.read_csv("mnist_train.csv")  # dataset.values returns an np array
 
 # create training data set
-_training_data = _training_dataset_combined.iloc[:, 1:784].values * (
+_training_data = _training_dataset_combined.iloc[:, 1:785].values * (
 	1 / 255)  # scale to make each value between 0 and 1
 _training_labels = _training_dataset_combined.iloc[:, 0].values  # target class values are found in the first column
 # add bias to input values for training data
@@ -21,7 +21,7 @@ print("loading test data")
 
 # create test data sets
 _test_dataset = pd.read_csv("mnist_test.csv")
-_test_data = _test_dataset.iloc[:, 1:784].values * (1 / 255)
+_test_data = _test_dataset.iloc[:, 1:785].values * (1 / 255)
 _test_labels = _test_dataset.iloc[:, 0].values
 _test_data_size = _test_dataset.shape[0]
 _test_bias_col = np.ones((_test_data_size, 1))

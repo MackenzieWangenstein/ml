@@ -16,16 +16,17 @@ class NeuralNet(object):
 				 epochs):
 
 		self.input_node_count = training_data.shape[1]  # should be 785
-		self.hidden_node_count = hidden_node_count #20
-		self.output_node_count = data_class_count #10
+		self.hidden_node_count = hidden_node_count  # 20
+		self.output_node_count = data_class_count  # 10
 
 		self.learning_rate = learning_rate
 		self.hidden_layer_weights = np.random.uniform(low=-0.5, high=0.5,
-									  size=(training_data.shape[1], hidden_node_count))#input nodes to hidden layer nodes
-		print("shape of hidden layer weights: ", self.hidden_layer_weights.shape) # shape - 785 x 20 TODO: remove
-		#columns represent the weights for node k
+													  size=(training_data.shape[1],
+															hidden_node_count))  # input nodes to hidden layer nodes
+		print("shape of hidden layer weights: ", self.hidden_layer_weights.shape)  # shape - 785 x 20 TODO: remove
+		# columns represent the weights for node k
 		self.output_layer_weights = np.random.uniform(low=-0.5, high=0.5,
-									  size=(hidden_node_count, data_class_count)) #shape 20 x 10 `
+													  size=(hidden_node_count + 1, data_class_count))  # shape 21 x 10 `
 
 		self.training_data = training_data
 		self.training_data_size = training_count
@@ -51,38 +52,42 @@ class NeuralNet(object):
 			raise Exception("The number of columns in the training data matrix does not match the number of columns " +
 							"in the test data matrix")
 
-
 	def run(self):
-		#for each
-		for i in range(self.training_data[0]): #for each training example
-			self.forward_propogate() #hidden_activations, output_activations
-			#calculate error terms at each output unit
-			#update weightgs
 
+		# for each
+		for i in range(2):  # for each training example  #self.training_data[0]) --todo: replace
+			_hidden_activations, _output_activations = self.forward_propogate(self.training_data[i])
+			print("in run")
+		# calculate error terms at each output unit
+		# update weightgs
 
 	# def output_errors(self, actual_output):
-	def forward_propogate(self):
-		#[60k examples, 785 input values] * [785input values, 20 hidden nodes]  = 60k x 20 activations] each column
-		#represents the activation value for node k
-		hidden_layer_activations = putil.predict_all(self.training_data, self.hidden_layer_weights) #shape:[785 x20]
-		# TODO: save as self? ^
-		# print("hidden layer activiations\n", hidden_layer_activations)  todo: remove
-		# print("hidden layer activations shape: ", hidden_layer_activations.shape) todo: remove
+	def forward_propogate(self, data_example):
+		# [1 example, 785 input values] * [785input values, 20 hidden nodes]  = [1 x 20activations]
+		# each column represents the activation value for node k
+		data_example = np.reshape(data_example, (1, len(data_example)))
 
-		#use sigmoid to squash activation value for each node k for every data example   = [60k x 20]
-		hidden_layer_sigmoids = putil.sigmoid_activation_values(hidden_layer_activations) #todo refactor to take just the sig
-		# print("hidden layer sigmoids\n", hidden_layer_sigmoids)
-		# print("hidden layer sigmoids shape", hidden_layer_sigmoids.shape)
+		hidden_layer_activations = np.dot(data_example, self.hidden_layer_weights)  # shape: [785 x20]
 
-		#[60k x 20hidden nodes] * [20 hidden nodes x 10 output nodes] = [60k x 10 ] each col is activation for node k
-		output_layer_activations = putil.predict_all(hidden_layer_sigmoids, self.output_layer_weights)
-		# TODO: save as self? ^
-		print("output activations shape ", output_layer_activations.shape)
-		output_layer_sigmoids = putil.sigmoid_activation_values(output_layer_activations)
-		# print("output layer sigmoids: ", output_layer_sigmoids)
-		print("output sigmoids shape", output_layer_sigmoids.shape)
+		# use sigmoid to squash activation value for each node k for every data example   = [60k x 20]
+		hidden_layer_sigmoids = putil.sigmoid_activation(
+			hidden_layer_activations)  # todo refactor to take just the sign
 
-		#determine error for each output unit -
-		return hidden_layer_sigmoids, output_layer_sigmoids  #TODO: sigmoid activations right?
+		# add bias  so that inputs into output layer is 20 hidden layer activations + (1 bias)
+		hidden_layer_sigmoids = np.concatenate((hidden_layer_sigmoids,
+												np.ones((np.shape(hidden_layer_sigmoids)[0],1))),
+											   axis=1)
 
+		# [1 x (20hidden nodes + 1bias)] * [(20 hidden nodes + 1bias) x 10 output nodes] = [1 x 10 ]
+		# each col is activation for output node k
+		# print("output weights:\n", self.output_layer_weights)
+		print("output weights shape:", self.output_layer_weights.shape)
 
+		output_layer_activations = np.dot(hidden_layer_sigmoids, self.output_layer_weights)
+		print("output layer activations shape: ", output_layer_activations.shape)
+		print("output layer activations\n", output_layer_activations)
+		output_layer_sigmoids = putil.sigmoid_activation(output_layer_activations)
+		print("output layer sigmoids:\n", output_layer_sigmoids)
+
+		# determine error for each output unit -
+		return hidden_layer_sigmoids, output_layer_sigmoids  # TODO: sigmoid activations right?

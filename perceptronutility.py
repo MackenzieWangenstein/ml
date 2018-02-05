@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 
-def sigmoid_activation_values(layer_activations):
+def sigmoid_activation_values_all(layer_activations):
 	"""
 		args:
 				layer_activations is a [data_examples x c] matrix where c is the number of nodes in the current layer.
@@ -21,6 +21,23 @@ def sigmoid_activation_values(layer_activations):
 		for j in range(node_activations_count):
 			sigmoid_activations[i][j] = 1 / (1 + math.exp(layer_activations[i][j]))
 	return sigmoid_activations
+
+
+def sigmoid_activation(data_example_activations):
+	"""
+			args:
+				data_example_activations:  holds the activation value for each node in the current layer for a particular
+				data example. obtained by taking the dot product of values feed as inputs from the prev node * the
+				 weights of nodes for current layer.
+				data_example_activations is a [1 x c] matrix where c is the number of nodes in the current layer.
+
+			:return: returns a [1 x c] array of sigmoid valeus. The sigmoid value(between 0 and 1) indicates if
+			the node fires or not.
+	"""
+	_sigmoid_activation = np.zeros((1,data_example_activations.shape[1]))  # 1 x n nodes
+	for i in range(data_example_activations.shape[1]): #for each activation, convert it to sigmoid activation
+		_sigmoid_activation[0][i] = 1 / (1 + math.exp(data_example_activations[0][i]))
+	return _sigmoid_activation
 
 
 ##TODO: remove
