@@ -79,8 +79,8 @@ class NeuralNet(object):
 	def training_cycle(self):
 		#TODO: add logic to shuffle inputs
 		# for each
-		output_prev_delta = 0
-		hidden_prev_delta = 0
+		output_prev_delta = 0 #TODO: make this a matrix of zeros -- so we can update all weights at once
+		hidden_prev_delta = 0 #TODO: make this a matrix of zeros
 
 		print("original output layer weights:",  self.output_layer_weights)
 		for i in range(2):  # for each training example  #self.training_data[0]) --todo: replace
@@ -110,6 +110,8 @@ class NeuralNet(object):
 			#update output layer weights first
 			#Dw_(kj) = h*(d_k)*(h_j) where d_k = the kth deltao value & hj = activation for hidden node j
 
+
+			#TODO: need to figure out if I need to stirp off the bias before weight update, also need to add momentum * previous weight change
 			Dwkj = self.learning_rate * np.dot(deltao_values, _hidden_layer_activations)
 			print("Dwkj: ", Dwkj)
 			self.output_layer_weights = self.output_layer_weights + Dwkj
