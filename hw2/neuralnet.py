@@ -53,8 +53,36 @@ class NeuralNet(object):
 							"in the test data matrix")
 
 	def run(self):
+		for i in range(self.epochs):
+			self.training_cycle()  # get confusion matrix
 
+			# #TODO: put in a helper function?
+			# # predict on training set
+			# training_predictions = putil.predict_all(self.training_data, self.weights)
+			# for element_index in range(self.training_data_size):
+			# 	_training_actual = np.argmax(training_predictions[element_index])
+			# 	_training_target = np.where(self.training_labels[element_index] == 1)[0]  # expected class as int
+			# 	self.training_confusion_matrix[_training_target, _training_actual] += 1
+			#
+			# # predict on test set
+			# test_predictions = putil.predict_all(self.test_data, self.weights)
+			# for element_index in range(self.test_data_size):
+			# 	_test_actual = np.argmax(test_predictions[element_index])
+			# 	_test_target = np.where(self.test_labels[element_index] == 1)[0]
+			# 	self.test_confusion_matrix[_test_target, _test_actual] += 1
+			#
+			# _curr_training_accuracy = putil.compute_accuracy(self.training_confusion_matrix)
+			# _test_accuracy = putil.compute_accuracy(self.test_confusion_matrix)
+			# print("training accuracy: ", _curr_training_accuracy)
+			# print("test acurracy: ", _test_accuracy)
+
+	def training_cycle(self):
+		#TODO: add logic to shuffle inputs
 		# for each
+		output_prev_delta = 0
+		hidden_prev_delta = 0
+
+		print("original output layer weights:",  self.output_layer_weights)
 		for i in range(2):  # for each training example  #self.training_data[0]) --todo: replace
 			_hidden_layer_activations, _output_layer_activations = self.forward_propogate(self.training_data[i])
 			_target_activations = self.training_labels[i]
@@ -70,13 +98,23 @@ class NeuralNet(object):
 			#dj = hj(1-hj) * (summation of output layer weights kj * deltao value for k)
 			#^ can find values for all dj(s) at once.
 			print("shape output weights: ", self.output_layer_weights.shape)
-			print("shape delta o(s): ", deltao_values.shape)
 
+			#backprop
 			delta_h_inner = np.dot( deltao_values, self.output_layer_weights.T)
 			delta_h =_hidden_layer_activations * (1- _hidden_layer_activations) * delta_h_inner
 			print("delta h  values : ", delta_h)
-			# print("hidden sig activation for data example ", i, " : ", _hidden_sig_activation)
-			# print("output sig activation for data example ", i, " : ", _output_sig_activation)
+
+
+			print("shape delta o(s) shape: ", deltao_values.shape)
+			print("hidden layer activations shape: ", _hidden_layer_activations)
+			#update output layer weights first
+			#Dw_(kj) = h*(d_k)*(h_j) where d_k = the kth deltao value & hj = activation for hidden node j
+
+			Dwkj = self.learning_rate * np.dot(deltao_values, _hidden_layer_activations)
+			print("Dwkj: ", Dwkj)
+			self.output_layer_weights = self.output_layer_weights + Dwkj
+			print("updated weights\n", self.output_layer_weights)
+			#randomize training data order --
 
 	# calculate error terms at each output unit
 		# update weightgs
