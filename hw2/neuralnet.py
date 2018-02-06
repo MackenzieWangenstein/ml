@@ -56,9 +56,27 @@ class NeuralNet(object):
 
 		# for each
 		for i in range(2):  # for each training example  #self.training_data[0]) --todo: replace
-			_hidden_sig_activation, _output_sig_activation = self.forward_propogate(self.training_data[i])
-			print("hidden sig activation for data example ", i, " : ", _hidden_sig_activation)
-			print("output sig activation for data example ", i, " : ", _output_sig_activation)
+			_hidden_layer_activations, _output_layer_activations = self.forward_propogate(self.training_data[i])
+			_target_activations = self.training_labels[i]
+			print("actual output activations: ", _output_layer_activations)
+			print("target output activations: ", _target_activations)
+			error = putil.sum_squared_error(_target_activations, _output_layer_activations)
+			print("error for iteration ", i, ": ", error)
+			#Calculate error terms for ech output unit k - slides Lecture 6 pg 37
+			deltao_values = _output_layer_activations*(1-_output_layer_activations)*(_target_activations - _output_layer_activations)
+			print("deltao: ", deltao_values)
+
+			#calculate the error terms for each hidden unit j - slides Lecture 6 pg 37
+			#dj = hj(1-hj) * (summation of output layer weights kj * deltao value for k)
+			#^ can find values for all dj(s) at once.
+			print("shape output weights: ", self.output_layer_weights.shape)
+			print("shape delta o(s): ", deltao_values.shape)
+
+			delta_h_inner = np.dot( deltao_values, self.output_layer_weights.T)
+			delta_h =_hidden_layer_activations * (1- _hidden_layer_activations) * delta_h_inner
+			print("delta h  values : ", delta_h)
+			# print("hidden sig activation for data example ", i, " : ", _hidden_sig_activation)
+			# print("output sig activation for data example ", i, " : ", _output_sig_activation)
 
 	# calculate error terms at each output unit
 		# update weightgs
@@ -72,8 +90,7 @@ class NeuralNet(object):
 		hidden_layer_activations = np.dot(data_example, self.hidden_layer_weights)  # shape: [785 x20]
 
 		# use sigmoid to squash activation value for each node k for every data example   = [60k x 20]
-		hidden_layer_sigmoids = putil.sigmoid_activation(
-			hidden_layer_activations)  # todo refactor to take just the sign
+		hidden_layer_sigmoids = putil.sigmoid_activation(hidden_layer_activations)
 
 		# add bias  so that inputs into output layer is 20 hidden layer activations + (1 bias)
 		hidden_layer_sigmoids = np.concatenate((hidden_layer_sigmoids,

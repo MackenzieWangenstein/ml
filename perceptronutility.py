@@ -23,6 +23,17 @@ def sigmoid_activation_values_all(layer_activations):
 	return sigmoid_activations
 
 
+
+def sum_squared_error(target_vector,  output_vector):
+	"""
+		Designed to calculate the sum_squared_error for a single training example
+		args:
+			shape: [1 x 10
+		returns value found from applying
+
+	"""
+	return 0.5*np.sum((target_vector - output_vector) ** 2)
+
 def sigmoid_activation(data_example_activations):
 	"""
 			args:
