@@ -13,8 +13,8 @@ def run_neural_network(training_data,
 	print("data class count", data_class_count)
 	learning_rate = 0.1
 	momentum = 0.9
-	# epochs = 50 #TODO: replace
-	epochs = 1
+	epochs = 50 #TODO: replace
+	epochs = 10
 	hidden_nodes1 = 20;
 	hidden_nodes2 = 50;
 	hidden_nodes3 = 100;

@@ -15,11 +15,10 @@ def sigmoid_activation_values_all(layer_activations):
 	"""
 	data_example_count = layer_activations.shape[0]  # 60k
 	node_activations_count = layer_activations.shape[1]  # n
-	print("activations count")
 	sigmoid_activations = np.zeros((data_example_count, node_activations_count))  # 60k x n nodes
 	for i in range(data_example_count):  # for every training example  //todo: is there a better way than o(n^2)
 		for j in range(node_activations_count):
-			sigmoid_activations[i][j] = 1 / (1 + math.exp(layer_activations[i][j]))
+			sigmoid_activations[i][j] = 1 / (1 + math.exp(-(layer_activations[i][j])))
 	return sigmoid_activations
 
 
@@ -47,7 +46,7 @@ def sigmoid_activation(data_example_activations):
 	"""
 	_sigmoid_activation = np.zeros((1,data_example_activations.shape[1]))  # 1 x n nodes
 	for i in range(data_example_activations.shape[1]): #for each activation, convert it to sigmoid activation
-		_sigmoid_activation[0][i] = 1 / (1 + math.exp(data_example_activations[0][i]))
+		_sigmoid_activation[0][i] = 1 / (1 + math.exp(- (data_example_activations[0][i])))
 	return _sigmoid_activation
 
 

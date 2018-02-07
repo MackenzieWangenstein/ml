@@ -20,7 +20,7 @@ print("loading test data")
 
 # create test data sets
 _test_dataset = pd.read_csv("mnist_test.csv")
-_test_data = _test_dataset.iloc[:, 1:785].values * (1 / 255)
+_test_data = _test_dataset.iloc[:, 1:785].values * (1 / 255) #TODO: investigate'
 _test_labels = _test_dataset.iloc[:, 0].values
 _test_data_size = _test_dataset.shape[0]
 _test_bias_col = np.ones((_test_data_size, 1))
