@@ -12,7 +12,9 @@ def run_neural_network(training_data,
 					   data_class_count):
 	print("data class count", data_class_count)
 	learning_rate = 0.1
-	epochs = 50
+	momentum = 0.9
+	# epochs = 50 #TODO: replace
+	epochs = 1
 	hidden_nodes1 = 20;
 	hidden_nodes2 = 50;
 	hidden_nodes3 = 100;
@@ -27,7 +29,8 @@ def run_neural_network(training_data,
 		_test_target_output = test_labels[j]
 		test_labels_matrix[j][_test_target_output] = 0.9
 
-	nn1 = NeuralNet(hidden_nodes1, learning_rate, data_class_count, training_data, training_data_size,
+
+	nn1 = NeuralNet(hidden_nodes1, learning_rate, momentum, data_class_count, training_data, training_data_size,
 					training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs)
 
 	nn1.run()
