@@ -65,6 +65,9 @@ class NeuralNet(object):
 		self.epochs = epochs
 		self.training_confusion_matrix = np.zeros((self.output_node_count, self.output_node_count))
 		self.test_confusion_matrix = np.zeros((self.output_node_count, self.output_node_count))
+		self.training_accuracy_history = np.zeros(epochs)
+		self.test_accuracy_history = np.zeros(epochs)
+
 
 		if self.hidden_layer_weights.shape[0] != self.training_data.shape[1]:
 			print("weight rows: ", self.hidden_layer_weights.shape[0])
@@ -78,6 +81,13 @@ class NeuralNet(object):
 			raise Exception("The number of columns in the training data matrix does not match the number of columns " +
 							"in the test data matrix")
 
+
+	# def plot_history(self):
+	# 	train =
+
+
+	#TODO: accuracy errors observed were due to how the confusion matrix was supplied. The book describes how to
+	#build a confusion matrix backwards- wikipedia has the correct definition.
 	def run(self):
 		epoch_results = dict()
 
@@ -85,50 +95,46 @@ class NeuralNet(object):
 			# print("previous output layer weights:", self.output_layer_weights)
 			prev_weights = self.output_layer_weights
 			self.training_cycle()  # get confusion matrix
-			print("changes in weights: ")
-			print(prev_weights - self.output_layer_weights)
+			# print("changes in weights: ")
+			# print(prev_weights - self.output_layer_weights)
 			# print("weights after training cycle \n", self.output_layer_weights)
 
 			#test if the first 5 predictions match whats being spit out of predict all
 			for j in range(5):
 				training_output_activations = self.forward_propagate(self.training_data[j])[1]
-				print("\n activiation for ", j, ": ", training_output_activations)
+				# print("\n activiation for ", j, ": ", training_output_activations)
 
 			# # get activations(as sigmoids) for data examples with final weights --
 			training_output_activations = self.forward_propogate_all(self.training_data)
-			print("\noutput activations:\n", training_output_activations )
+			# print("\noutput activations:\n", training_output_activations )
 			# print("output layer activations shape for training: ", training_output_activations.shape)
 
 			for element_index in range(training_output_activations.shape[0]):
-				# print("_training actual activation: ", training_output_activations[element_index])
 				_training_actual = np.argmax(training_output_activations[element_index])
-				# print("training actual: ", _training_actual)
 				_training_target = (np.where(self.training_labels[element_index] == 0.9)[0])[0]  #=[t] without last [0]
+				self.training_confusion_matrix[_training_actual, _training_target] += 1
+
+			# print("training actual: ", _training_actual)
+				# print("_training actual activation: ", training_output_activations[element_index])
 				# print("training targ: ", _training_target)
-
-				self.training_confusion_matrix[_training_target, _training_actual] += 1
+				# print("trainng target vector: ", self.training_labels[element_index])
+				# print("\ntarget: ", _training_target, "\n Trainiing actual", _training_actual)
 			# print("confusition matrinx training\n\n", self.training_confusion_matrix) #TODO: remove
-
 
 			test_output_activations = self.forward_propogate_all(self.test_data)
 			for element_index in range(test_output_activations.shape[0]):
 				_test_actual = np.argmax(test_output_activations[element_index])
 				_test_target = np.where(self.test_labels[element_index] == 0.9)[0][0]
-				self.test_confusion_matrix[_test_target, _test_actual] += 1
-			# print("confusion matrix test:\n\n", self.test_confusion_matrix ) #TODO: remove
-			# todo  -everything is getting classified as a 0 or 4 for actual in first 3 epochs
+				self.test_confusion_matrix[_test_actual, _test_target] += 1
 
 			_curr_training_accuracy = putil.compute_accuracy(self.training_confusion_matrix)
 			_test_accuracy = putil.compute_accuracy(self.test_confusion_matrix)
-			print("training accuracy: ", _curr_training_accuracy, " for epoch ", i)
-			print("test acurracy: ", _test_accuracy, " for epoch ", i)
 
-			#todo plot
-			epoch_results[i] = {
-				'train': _curr_training_accuracy,
-				'test': _test_accuracy
-			}
+			self.training_accuracy_history[i] = _curr_training_accuracy
+			self.test_accuracy_history[i] = _test_accuracy
 
+		print("training accuracy history: ", self.training_accuracy_history)
+		print("test accuracy history: ", self.test_accuracy_history)
 			#todo: add logic to break early
 		return self.epochs, _curr_training_accuracy, _test_accuracy, {'accuracy': epoch_results}, self.test_confusion_matrix
 
@@ -256,13 +262,17 @@ class NeuralNet(object):
 			Dwji = self.learning_rate * np.dot(data_example.T,
 											   delta_h_values[:, :-1]) + self.momentum * hidden_prev_delta
 
-			#Delta h is changing between iterations but not data example -- am I using the same data example!?!?? - no no i'm not
-			# print("hidden previous delta: ", hidden_prev_delta)
-			hidden_prev_delta = self.hidden_layer_weights - Dwji  #TODO: ask anthony - can only get it to work if i subtract
-			self.hidden_layer_weights = hidden_prev_delta
+			# #verify that dwji is not empty! hard to tell because np skips printing middle columns and rows
+			# for i in range (1):  #make sure that the first3 nodes have atleast some values that are not zero
+			# 	col = Dwji[:, i]
+			# 	print(col)
+			#  verified that Dwji is not empty
 
-			output_prev_delta= self.output_layer_weights - Dwkj  # output layer weights shape: [21 x 10]
-			self.output_layer_weights = output_prev_delta
+			hidden_prev_delta = Dwji
+			self.hidden_layer_weights -= hidden_prev_delta
+
+			output_prev_delta = Dwkj
+			self.output_layer_weights -= output_prev_delta
 
 	def forward_propogate_all(self, data_examples_set):
 		"""
