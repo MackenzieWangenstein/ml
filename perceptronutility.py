@@ -31,7 +31,7 @@ def sum_squared_error(target_vector,  output_vector):
 		returns value found from applying
 
 	"""
-	return 0.5*np.sum((target_vector - output_vector) ** 2)
+	return 0.5*np.sum((output_vector - target_vector) ** 2)
 
 def sigmoid_activation(data_example_activations):
 	"""

@@ -1,5 +1,7 @@
 import numpy as np
 import perceptronutility as putil
+import matplotlib.pyplot as plt
+
 
 
 class NeuralNet(object):
@@ -49,11 +51,9 @@ class NeuralNet(object):
 		self.hidden_layer_weights = np.random.uniform(low=-0.05, high=0.05,
 													  size=(training_data.shape[1],
 															hidden_node_count))  # input nodes to hidden layer nodes
-		print("shape of hidden layer weights: ", self.hidden_layer_weights.shape)  # shape - 785 x 20 TODO: remove
-		# columns represent the weights for node k
+		print("shape of hidden layer weights: ", self.hidden_layer_weights.shape)  # shape - 785 x 20
 		self.output_layer_weights = np.random.uniform(low=-0.05, high=0.05,
 													  size=(hidden_node_count + 1, data_class_count))  # shape 21 x 10 `
-
 		self.training_data = training_data
 		self.training_data_size = training_count
 		self.training_labels = training_labels_matrix
@@ -66,8 +66,9 @@ class NeuralNet(object):
 		self.training_confusion_matrix = np.zeros((self.output_node_count, self.output_node_count))
 		self.test_confusion_matrix = np.zeros((self.output_node_count, self.output_node_count))
 		self.training_accuracy_history = np.zeros(epochs)
+		self.training_error_history = np.zeros(epochs)
 		self.test_accuracy_history = np.zeros(epochs)
-
+		self.test_error_history = np.zeros(epochs)
 
 		if self.hidden_layer_weights.shape[0] != self.training_data.shape[1]:
 			print("weight rows: ", self.hidden_layer_weights.shape[0])
@@ -82,8 +83,6 @@ class NeuralNet(object):
 							"in the test data matrix")
 
 
-	# def plot_history(self):
-	# 	train =
 
 
 	#TODO: accuracy errors observed were due to how the confusion matrix was supplied. The book describes how to
@@ -92,34 +91,16 @@ class NeuralNet(object):
 		epoch_results = dict()
 
 		for i in range(self.epochs):
-			# print("previous output layer weights:", self.output_layer_weights)
-			prev_weights = self.output_layer_weights
-			self.training_cycle()  # get confusion matrix
-			# print("changes in weights: ")
-			# print(prev_weights - self.output_layer_weights)
-			# print("weights after training cycle \n", self.output_layer_weights)
+			self.training_cycle()
 
-			#test if the first 5 predictions match whats being spit out of predict all
-			for j in range(5):
-				training_output_activations = self.forward_propagate(self.training_data[j])[1]
-				# print("\n activiation for ", j, ": ", training_output_activations)
-
-			# # get activations(as sigmoids) for data examples with final weights --
+			#get activations(as sigmoids) for data examples using final weights from previous training cycle
 			training_output_activations = self.forward_propogate_all(self.training_data)
-			# print("\noutput activations:\n", training_output_activations )
-			# print("output layer activations shape for training: ", training_output_activations.shape)
 
 			for element_index in range(training_output_activations.shape[0]):
 				_training_actual = np.argmax(training_output_activations[element_index])
 				_training_target = (np.where(self.training_labels[element_index] == 0.9)[0])[0]  #=[t] without last [0]
 				self.training_confusion_matrix[_training_actual, _training_target] += 1
-
-			# print("training actual: ", _training_actual)
-				# print("_training actual activation: ", training_output_activations[element_index])
-				# print("training targ: ", _training_target)
-				# print("trainng target vector: ", self.training_labels[element_index])
-				# print("\ntarget: ", _training_target, "\n Trainiing actual", _training_actual)
-			# print("confusition matrinx training\n\n", self.training_confusion_matrix) #TODO: remove
+				self.training_error_history[i] = putil.sum_squared_error(_training_target, _training_actual)
 
 			test_output_activations = self.forward_propogate_all(self.test_data)
 			for element_index in range(test_output_activations.shape[0]):
@@ -133,43 +114,30 @@ class NeuralNet(object):
 			self.training_accuracy_history[i] = _curr_training_accuracy
 			self.test_accuracy_history[i] = _test_accuracy
 
+		return self.epochs, _curr_training_accuracy, _test_accuracy, self.test_confusion_matrix
+
+	def display_prediction_history(self):
 		print("training accuracy history: ", self.training_accuracy_history)
 		print("test accuracy history: ", self.test_accuracy_history)
-			#todo: add logic to break early
-		return self.epochs, _curr_training_accuracy, _test_accuracy, {'accuracy': epoch_results}, self.test_confusion_matrix
 
-	#
-	# def training_cycle_2(self):
-	# 	output_prev_delta = np.zeros(np.shape(self.output_layer_weights))
-	# 	hidden_prev_delta = np.zeros(np.shape(self.hidden_layer_weights))
-	# 	# _target_activations = self.training_labels[data_example_index]
-	# 	input_list = np.arange(self.training_data.shape[0])
-	# 	np.random.shuffle(input_list) #used to randomize training data
-	#
-	# 	_hidden_layer_activations, _output_layer_activations = self.forward_propagate_all(self.training_data)
-	# 	delta_o_values = _output_layer_activations * (1 - _output_layer_activations) * (
-	# 			_output_layer_activations - self.training_labels)
-	#
-	# 	print("deltao: ", delta_o_values) # TODO: remove
-	#
-	# 	delta_h_inner = np.dot(delta_o_values, self.output_layer_weights.T)    #needs to come before the weight updates
-	# 	print("delta inner values ", delta_h_inner)  #TODO here or belwo ?
-	# 	print("hidden_layer_activations ", _hidden_layer_activations)
-	# 	delta_h_values = _hidden_layer_activations * (1 - _hidden_layer_activations) * delta_h_inner
-	# 	print("delta_h_values: ", delta_h_values)  # all have the same delta h values
-	#
-	# 	#update output weights
-	# 	# print("shape delta o(s) shape: ", delta_o_values.shape)
-	# 	# print("hidden layer activations shape: ", _hidden_layer_activations)
-	# 	# print("previous weights for  ", i, ":\n", self.output_layer_weights)
-	#
-	# 	""" updated output layer weights = Dwkj + momentum * previous weight change """
-	# 	# Dwkj = h*(d_k)*(h_j) where h is the learning rate, d_k = the kth deltao value & hj = activation for hidden node j
-	# 	Dwkj = self.learning_rate * np.dot(_hidden_layer_activations.T,
-	# 									   delta_o_values) + self.momentum * output_prev_delta
-	# 	self.output_layer_weights = self.output_layer_weights - Dwkj 	# output layer weights shape: [21 x 10]
-	# 	output_prev_delta = self.output_layer_weights
 
+	def plot_accuracy_history(self):
+		print("Accuracy Histories: ")
+		plt.plot(self.epochs, self.test_accuracy_history)
+		plt.plot(self.epochs, self.test_accuracy_history)
+		plt.xlabel('epoch')
+		plt.ylabel('accuracy')
+		plt.legend(['training data', 'test data'], loc='upper left')
+		plt.show()
+
+	def plot_error_history(self):
+		print("Error Histories: ")
+		plt.plot(self.epochs, self.training_error_history)
+		plt.plot(self.epochs, self.test_error_history)
+		plt.xlabel('epoch')
+		plt.ylabel('error')
+		plt.legend(['training data', 'test data'], loc='upper left')
+		plt.show()
 
 	def training_cycle(self):
 
@@ -181,20 +149,10 @@ class NeuralNet(object):
 		#TODO: why are the weights not updated between each training cycle
 		for i in  range(self.training_data.shape[0]):  # tune weights after each training example in training data set
 
-			data_example_index = input_list[i] #TODO: garuantuee  This works
-
-			# print("index i in input list: ", i )
-			# print("corresponds to the training element in position ", data_example_index)
-			# print("original output layer weights:", self.output_layer_weights)
-
-			# hidden and output activations for training_data example only
+			data_example_index = input_list[i]
 			_hidden_layer_activations, _output_layer_activations = self.forward_propagate(self.training_data[data_example_index])
 			_target_activations = self.training_labels[data_example_index]
-			# print("actual output activations: ", _output_layer_activations) TODO: remove
-			# print("target output activations: ", _target_activations)
-			error = putil.sum_squared_error(_target_activations, _output_layer_activations)
-			# if (np.mod(i, 5000) == 0):
-			# 	print("Iteration: ", i, " Error: ", error) #TODO: remove
+
 
 			# print("error for iteration ", i, ": ", error) TODO: remove
 
