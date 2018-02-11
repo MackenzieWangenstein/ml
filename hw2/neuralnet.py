@@ -4,16 +4,15 @@ import matplotlib.pyplot as plt
 
 
 class NeuralNet(object):
+	#todo: refactor to get rid of param for data_set counts -- just use shape instead
 	def __init__(self,
 				 hidden_node_count,
 				 learning_rate,
 				 momentum,
 				 data_class_count,
 				 training_data,
-				 training_count,
 				 training_labels_matrix,
 				 test_data,
-				 test_data_size,
 				 test_labels_matrix,
 				 epochs):
 
@@ -54,10 +53,10 @@ class NeuralNet(object):
 		self.output_layer_weights = np.random.uniform(low=-0.05, high=0.05,
 													  size=(hidden_node_count + 1, data_class_count))  # shape 21 x 10 `
 		self.training_data = training_data
-		self.training_data_size = training_count
+		self.training_data_size = training_data.shape[0]
 		self.training_labels = training_labels_matrix
 		self.test_data = test_data
-		self.test_data_size = test_data_size
+		self.test_data_size = test_data.shape[0]
 		self.test_labels = test_labels_matrix
 
 		self.bias = 1
@@ -68,8 +67,6 @@ class NeuralNet(object):
 		self.training_error_history = np.zeros(epochs)
 		self.test_accuracy_history = np.zeros(epochs)
 		self.test_error_history = np.zeros(epochs)
-		# self.final_training_accuracy = 0.0 #TODO: remove
-		# self.final_test_accuracy = 0.0 #TODO: remove
 
 		if self.hidden_layer_weights.shape[0] != self.training_data.shape[1]:
 			print("weight rows: ", self.hidden_layer_weights.shape[0])
@@ -108,11 +105,9 @@ class NeuralNet(object):
 			_test_accuracy = putil.compute_accuracy(self.test_confusion_matrix)
 
 			self.training_accuracy_history[i] = _curr_training_accuracy
-			# self.final_training_accuracy = _curr_training_accuracy #TODO: remove
 			self.test_accuracy_history[i] = _test_accuracy
-		# self.final_test_accuracy = _test_accuracy#TODO: remove
 			print("finished epoch ", i)
-		return self.epochs, _curr_training_accuracy, _test_accuracy, self.test_confusion_matrix  # TODO: play around w/ final return
+		return self.epochs, _curr_training_accuracy, _test_accuracy
 
 	def display_prediction_history(self):
 		print("training accuracy history: ", self.training_accuracy_history)
@@ -128,8 +123,7 @@ class NeuralNet(object):
 		plt.ylabel('accuracy')
 		plt.legend(['training data', 'test data'], loc='upper left')
 		plt.savefig(filename)
-
-	# plt.show()
+		plt.clf()
 
 	def plot_error_history(self):
 		print("Error Histories: ")
@@ -141,6 +135,7 @@ class NeuralNet(object):
 		plt.legend(['training data', 'test data'], loc='upper left')
 		plt.show()
 		plt.savefig
+		plt.clf()
 
 	def save_final_results(self, filename):
 		"""
@@ -154,6 +149,8 @@ class NeuralNet(object):
 				   str(self.test_accuracy_history[self.epochs - 1]) + " after " + str(self.epochs) + " epochs")
 		file.write("\nTest Confusion Matrix: \n")
 		file.write(str(self.test_confusion_matrix))
+		file.write("\ntraining accuracy history: \n" + str(self.training_accuracy_history))
+		file.write("\ntest accuracy history: \n" + str(self.test_accuracy_history))
 		file.close()
 
 	def training_cycle(self):
@@ -161,7 +158,6 @@ class NeuralNet(object):
 		hidden_prev_delta = np.zeros(np.shape(self.hidden_layer_weights))
 		input_list = np.arange(self.training_data.shape[0])
 		np.random.shuffle(input_list)  # used to randomize training data
-		# print("shufffled input_list", input_list)   #TODO: remove
 		for i in range(self.training_data.shape[0]):  # tune weights after each training example in training data set
 			data_example_index = input_list[i]
 			_hidden_layer_activations, _output_layer_activations = self.forward_propagate(
