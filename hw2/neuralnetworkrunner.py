@@ -135,27 +135,13 @@ def balanced_subset_data(training_data, training_labels, data_class_count, desir
 	added_examples_count = 0
 	training_data = np.array(training_data)
 	# np.random.shuffle(training_data) #TODO: determine if we care to have data shuffled each time
-	print("desired entries count: ", desired_entries_count)
-	print("items needed per class: ", items_needed_per_class)
-	print("training data shape: ", training_data.shape)
 	subset = np.zeros((desired_entries_count, training_data.shape[1]))
-	print("subset shape: ", subset.shape)
-	# subset[0] = training_data[0]
-	# subset.any()
 	not_added_indices = []
-	# last_index_visted = 0
-
-	# raise Exception("end execution on purpose")  # TODO: remove
-	# np.zeros((desired_entries_count, training_data.shapep))
-
 
 	# used to keep track of how many data examples there are for each data class- ensures we get a balanced subset
 	class_tracker_map = np.zeros(data_class_count)
-	# print("class tracker_map shape ", class_tracker_map.shape)
-	# print("class tracker map", class_tracker_map)
 	for i in range(training_data.shape[0]):
 		if added_examples_count == desired_entries_count:
-			# last_index_visted = i
 			break
 		if not class_count_exceeded(class_tracker_map, items_needed_per_class, training_labels[i]):
 			subset[added_examples_count] = training_data[i]
@@ -164,10 +150,6 @@ def balanced_subset_data(training_data, training_labels, data_class_count, desir
 		else:
 			not_added_indices.append(i)
 
-	# print("added Class tracker map: ", class_tracker_map)
-	# print("added all balanced data. added examples count ", added_examples_count);
-	# print("desired count: ", desired_entries_count)
-	# ensure that subset meets desired length requirements
 	if added_examples_count != desired_entries_count:
 		print("Warning! could not create a subset of length ", desired_entries_count, " with balanced data.",
 			  " appending data examples at random to reach subset size requirements")
@@ -188,8 +170,6 @@ def balanced_subset_data(training_data, training_labels, data_class_count, desir
 	print("final class representation of training data subset: ",  class_tracker_map)
 	return subset
 
-
-# half that again to get quarter.
 def class_count_exceeded(class_tracker_map, items_needed_per_class, data_example_class):
 	count = class_tracker_map[data_example_class]
 	if count >= items_needed_per_class:
