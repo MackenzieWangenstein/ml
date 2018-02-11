@@ -1,6 +1,7 @@
 from hw2.neuralnet import NeuralNet
 
 import numpy as np
+import math
 
 
 def run_neural_network(training_data,
@@ -9,15 +10,16 @@ def run_neural_network(training_data,
 					   test_data,
 					   test_data_size,
 					   test_labels,
-					   data_class_count):
+					   data_class_count,
+					   learning_rate):
 	print("data class count", data_class_count)
-	learning_rate = 0.1
+	# learning_rate = 0.1
 	momentum_default = 0.9
 	momentum_zero = 0
 	momentum_quartile = 0.25
 	momentum_half = 0.50
-	# epochs = 4
-	epochs = 50
+	epochs = 1
+	# epochs = 50
 	hidden_nodes1 = 20
 	hidden_nodes2 = 50
 	hidden_nodes_hundred = 100
@@ -34,16 +36,17 @@ def run_neural_network(training_data,
 
 	"""nn experiment 1  - hidden node count = 20, momentum = 0.9"""
 
-	nn1 = NeuralNet(hidden_nodes1, learning_rate, momentum_default, data_class_count, training_data, training_data_size,
-					training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs)
-
-	p1_epochs_ran, p1_training_accuracy, p1_test_accuracy, p1_confusion_mat = nn1.run()
-	nn1.plot_accuracy_history("hw2/results/nn1.png")
-	nn1.save_final_results("hw2/results/nn1results.txt")
-	# nn1.plot_error_history()
-	print("Perceptron withen hidden nodes ", hidden_nodes1, " had a final training accuracy of ", p1_training_accuracy, " and a test",
-		  " accuracy of ", p1_test_accuracy, "after ", p1_epochs_ran, " epochs")
-	nn1.display_prediction_history()
+	# nn1 = NeuralNet(hidden_nodes1, learning_rate, momentum_default, data_class_count, training_data, training_data_size,
+	# 				training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs)
+	#
+	# p1_epochs_ran, p1_training_accuracy, p1_test_accuracy, p1_confusion_mat = nn1.run()
+	# nn1.plot_accuracy_history("hw2/results/nn1.png")
+	# nn1.save_final_results("hw2/results/nn1results.txt")
+	# # nn1.plot_error_history()
+	# print("Perceptron withen hidden nodes ", hidden_nodes1, " had a final training accuracy of ", p1_training_accuracy,
+	# 	  " and a test",
+	# 	  " accuracy of ", p1_test_accuracy, "after ", p1_epochs_ran, " epochs")
+	# nn1.display_prediction_history()
 
 	"""nn experiment 1  - hidden node count = 50, momentum = 0.9"""
 
@@ -108,9 +111,112 @@ def run_neural_network(training_data,
 	# nn6_training_accuracy,  " and a test accuracy of ", nn6_test_accuracy, "after ", nn6_epochs_ran, " epochs")
 	# nn6.display_prediction_history()
 
+	# run_experiment(hidden_nodes_hundred, learning_rate, momentum_default, data_class_count, training_data, training_data_size,
+	# 			   training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs, "nn6")
 	"""Experiment 3: vary training examples"""
 
-	"""nn experiment 3: momentum = 0.9, hidden node count = 100 """
+	"""nn7 - experiment 3: momentum = 0.9, hidden node count = 100 """
+
+	half_data = balanced_subset_data(training_data, training_labels, data_class_count, 0.5)
+	print("half data shape: ", half_data.shape)
+	print("half data:\n", half_data)
+	print("Test of training data size: ", training_data.shape)
 
 
+# run_experiment(hidden_nodes_hundred, learning_rate, momentum_default, data_class_count, training_data, training_data_size,
+# 			   training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs, "nn7")
 
+def balanced_subset_data(training_data, training_labels, data_class_count, desired_data_percentage):
+	"""
+		creates a subset of data examples where data is approximately balanced
+	"""
+	desired_entries_count = math.floor(training_data.shape[0] * desired_data_percentage)
+	items_needed_per_class = math.floor(desired_entries_count / data_class_count)
+	added_examples_count = 0
+	training_data = np.array(training_data)
+	# np.random.shuffle(training_data) #TODO: determine if we care to have data shuffled each time
+	print("desired entries count: ", desired_entries_count)
+	print("items needed per class: ", items_needed_per_class)
+	print("training data shape: ", training_data.shape)
+	subset = np.zeros((desired_entries_count, training_data.shape[1]))
+	print("subset shape: ", subset.shape)
+	# subset[0] = training_data[0]
+	# subset.any()
+	not_added_indices = []
+	# last_index_visted = 0
+
+	# raise Exception("end execution on purpose")  # TODO: remove
+	# np.zeros((desired_entries_count, training_data.shapep))
+
+
+	# used to keep track of how many data examples there are for each data class- ensures we get a balanced subset
+	class_tracker_map = np.zeros(data_class_count)
+	# print("class tracker_map shape ", class_tracker_map.shape)
+	# print("class tracker map", class_tracker_map)
+	for i in range(training_data.shape[0]):
+		if added_examples_count == desired_entries_count:
+			# last_index_visted = i
+			break
+		if not class_count_exceeded(class_tracker_map, items_needed_per_class, training_labels[i]):
+			subset[added_examples_count] = training_data[i]
+			added_examples_count += 1
+			class_tracker_map[training_labels[i]] += 1
+		else:
+			not_added_indices.append(i)
+
+	# print("added Class tracker map: ", class_tracker_map)
+	# print("added all balanced data. added examples count ", added_examples_count);
+	# print("desired count: ", desired_entries_count)
+	# ensure that subset meets desired length requirements
+	if added_examples_count != desired_entries_count:
+		print("Warning! could not create a subset of length ", desired_entries_count, " with balanced data.",
+			  " appending data examples at random to reach subset size requirements")
+		j = 0
+		while added_examples_count != desired_entries_count and j < len(not_added_indices):
+			index = not_added_indices[j]
+			subset[added_examples_count] = training_data[index]
+			added_examples_count += 1
+			class_tracker_map[training_labels[j]] += 1
+			j += 1
+
+	if added_examples_count != desired_entries_count:
+		raise Exception("Something went wrong! ran out of examples while creating subset. bug here!")
+
+	if np.unique(subset, axis=0).shape[0] != desired_entries_count:
+		raise Exception("Duplicate training example found!")
+
+	print("final class representation of training data subset: ",  class_tracker_map)
+	return subset
+
+
+# half that again to get quarter.
+def class_count_exceeded(class_tracker_map, items_needed_per_class, data_example_class):
+	count = class_tracker_map[data_example_class]
+	if count >= items_needed_per_class:
+		return True
+	else:
+		return False
+
+
+def run_experiment(hidden_nodes,
+				   learning_rate,
+				   momentum,
+				   data_class_count,
+				   training_data,
+				   training_data_size,
+				   training_labels_matrix,
+				   test_data,
+				   test_data_size,
+				   test_labels_matrix,
+				   epochs,
+				   experiment_name):
+	nn = NeuralNet(hidden_nodes, learning_rate, momentum, data_class_count, training_data, training_data_size,
+				   training_labels_matrix, test_data, test_data_size, test_labels_matrix, epochs)
+
+	nn_epochs_ran, nn_training_accuracy, nn_test_accuracy, nn_confusion_mat = nn.run()  # TODO: remove nn_confu matrix
+	nn.plot_accuracy_history("hw2/results/" + experiment_name + ".png")
+	nn.save_final_results("hw2/results/" + experiment_name + ".txt")
+	# nn.plot_error_history()
+	print("Perceptron with momentum ", momentum, "and 100 hidden nodes had a final training accuracy of ",
+		  nn_training_accuracy, " and a test accuracy of ", nn_test_accuracy, "after ", nn_epochs_ran, " epochs")
+	nn.display_prediction_history()

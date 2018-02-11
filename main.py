@@ -5,7 +5,7 @@ from hw2 import neuralnetworkrunner
 print("loading training data")
 # Import training data
 _training_dataset_combined = pd.read_csv("mnist_train.csv")  # dataset.values returns an np array
-
+#note training data set file is missing a training example - only have 59,999 instead of 60k
 # create training data set
 _training_data = _training_dataset_combined.iloc[:, 1:785].values * (
 	1 / 255)  # scale to make each value between 0 and 1
@@ -33,4 +33,4 @@ data_class_count = 10 #10 classes numbers 0-9
 # 								_test_data_size, _test_labels, _rand_weights)
 
 neuralnetworkrunner.run_neural_network(_training_data, _training_data_size, _training_labels, _test_data,
-									   _test_data_size, _test_labels, data_class_count)
+									   _test_data_size, _test_labels, data_class_count, learning_rate=0.1)
