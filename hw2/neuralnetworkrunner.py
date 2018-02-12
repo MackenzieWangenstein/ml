@@ -18,7 +18,7 @@ def run_neural_network(training_data,
 	momentum_zero = 0
 	momentum_quartile = 0.25
 	momentum_half = 0.50
-	epochs = 3  # 50  # TODO: 50
+	epochs = 50  # 50  # TODO: 50
 	hidden_nodes_twenty = 20
 	hidden_nodes_fifty = 50
 	hidden_nodes_hundred = 100
