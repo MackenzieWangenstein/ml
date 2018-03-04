@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class NeuralNet(object):
-	#todo: refactor to get rid of param for data_set counts -- just use shape instead
+	# todo: refactor to get rid of param for data_set counts -- just use shape instead
 	def __init__(self,
 				 hidden_node_count,
 				 learning_rate,
