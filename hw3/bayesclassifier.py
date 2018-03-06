@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import perceptronutility as putil
 
 
 class BayesClassifier(object):
@@ -8,24 +9,26 @@ class BayesClassifier(object):
 				 spam_test,
 				 not_spam_train,
 				 not_spam_test):
-		self.spam_train = spam_train[:]
+		self.feature_count = spam_train.shape[1] - 1
+		self.spam_train = spam_train[:, 0:self.feature_count]  #[:, 0:_data_spam.shape[1]-1]
 		self.spam_train_count = spam_train.shape[0]
-		self.spam_test = spam_test
-		self.not_spam_train = not_spam_train
+		self.spam_test = spam_test[:, 0:self.feature_count]
+		self.not_spam_train = not_spam_train[:, 0:self.feature_count]
 		self.not_spam_train_count = not_spam_train.shape[0]
-		self.not_spam_test = not_spam_test
+		self.not_spam_test = not_spam_test[:, 0:self.feature_count]
 		self.prob_spam = self.spam_train_count / (self.spam_train_count + self.not_spam_train_count)
 		self.prob_not_spam = self.not_spam_train_count / (self.spam_train_count + self.not_spam_train_count)
 		self.spam_means = []
 		self.spam_std_devs = []
 		self.not_spam_means = []
 		self.not_spam_std_devs = []
-		self.test_set = np.concatenate((self.spam_train, self.not_spam_train), axis=0)
-		print("Test_set shape ", self.test_set.shape)
-		self.exceptions_caught = 0
-		self.none_exceptions = 0
-		self.feature_count = spam_train.shape[1]
-		print(self.feature_count)
+		self.test_set_labeled = np.concatenate((spam_train, not_spam_train), axis=0)
+		self.test_set = self.test_set_labeled[:,0:self.feature_count]
+		self.test_confusion_matrix = np.zeros((self.test_set.shape[0], self.test_set.shape[0]))
+		print("confusion matrix shape: ", self.test_confusion_matrix.shape)
+		# print("Test_set shape ", self.test_set.shape)
+		# self.exceptions_caught = 0
+		# self.none_exceptions = 0
 
 	def predict(self):
 		# PART 2
@@ -37,7 +40,7 @@ class BayesClassifier(object):
 		print("spam std dev for 57 features: ", self.not_spam_std_devs)  # TODO: keep or remove
 
 		# Part 3) Use Gaussian Naive Bayes algorith to classify test set
-		self.predict_class()
+		return self.predict_class()
 
 	def calc_means_and_std_devs(self):
 		# get mean and std devations for spam features
@@ -65,6 +68,7 @@ class BayesClassifier(object):
 		#create a dict to hold the probability of spam, not spam, and class predicted
 		# convert each
 		print("test of shape for test set: ", self.test_set.shape)
+		test_prediction_results = dict()
 		for data_idx in range(self.test_set.shape[0]):
 			spam_feature_probs = np.zeros(self.feature_count)
 			not_spam_feature_probs = np.zeros(self.feature_count)
@@ -80,10 +84,30 @@ class BayesClassifier(object):
 				# print("norm features distrubted neg", not_spam_feature_probs)
 				# print("numbers of exceptions caught: ", self.exceptions_caught)
 				# print("non exceptions ", self.none_exceptions)
-				prob_of_spam = math.log(self.prob_spam)*np.sum(spam_feature_probs)
-				# print("prob of spam: ", prob_of_spam)
-				prob_of_not_spam = math.log(self.prob_not_spam)*np.sum(not_spam_feature_probs)
-				# print("prob of not spam: ", prob_of_not_spam)
+			prob_of_spam = math.log(self.prob_spam)*np.sum(spam_feature_probs)
+			# print("prob of spam: ", prob_of_spam)
+			prob_of_not_spam = math.log(self.prob_not_spam)*np.sum(not_spam_feature_probs)
+			# print("prob of not spam: ", prob_of_not_spam)
+
+			_predicted = 0
+			if prob_of_spam > prob_of_not_spam:
+				_predicted = 1
+				#np.argmax([prob_of_spam, prob_of_not_spam])
+			_actual = int(self.test_set_labeled[data_idx][57]) #TODO: change from hard coded
+			print("prediction: ", _predicted, "actual: ", _actual)
+			self.test_confusion_matrix[_predicted][_actual] += 1
+		_test_accuracy = putil.compute_accuracy(self.test_confusion_matrix)
+
+
+		test_prediction_results[data_idx] = {
+			'prob_spam': prob_of_spam,
+			'prob_not_spam': prob_of_not_spam,
+			'predicted': _predicted ,
+			'actual': _actual
+		}
+
+
+		return test_prediction_results, self.test_confusion_matrix, _test_accuracy
 
 
 	def gaussian_naive_bayes_alg(self, x_sub, mean, std_dev):

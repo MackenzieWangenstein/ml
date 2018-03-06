@@ -8,11 +8,11 @@ def run():
 	data = np.array(pd.read_csv("hw3/spambase.csv"))  # dataset.values returns an np array
 	print("data.shape ", data.shape)
 	_data_spam = data[data[:, 57] > 0, :]
-	_data_spam = _data_spam[:, 0:_data_spam.shape[1]-1]
+	# _data_spam = _data_spam[:, 0:_data_spam.shape[1]-1]
 
 
 	_data_not_spam = data[data[:, 57] <= 0, :]
-	_data_not_spam = _data_not_spam[:, 0:_data_not_spam.shape[1]-1]
+	# _data_not_spam = _data_not_spam[:, 0:_data_not_spam.shape[1]-1]
 	np.random.shuffle(_data_spam)
 	np.random.shuffle(_data_not_spam)
 
@@ -28,7 +28,10 @@ def run():
 	print("shape of  not spam_test: ", not_spam_test.shape)
 
 	bc = BayesClassifier(spam_train, spam_test, not_spam_train, not_spam_test)
-	bc.predict()
+	results, confusion_matrix, accuracy = bc.predict()
+	print("accuracy: ", accuracy)
+	print(results)
+	print(confusion_matrix)
 
 
 def test_means_and_dev_calc():
