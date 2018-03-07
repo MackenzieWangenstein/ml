@@ -11,11 +11,7 @@ def run():
 	print("data.shape ", data.shape)
 	_data_spam = data[data[:, 57] > 0, :]
 	print(_data_spam[_data_spam[:, 56] == 278, :])
-	# _data_spam = _data_spam[:, 0:_data_spam.shape[1]-1]
-
-
 	_data_not_spam = data[data[:, 57] <= 0, :]
-	# _data_not_spam = _data_not_spam[:, 0:_data_not_spam.shape[1]-1]
 	np.random.shuffle(_data_spam)
 	np.random.shuffle(_data_not_spam)
 
@@ -34,7 +30,8 @@ def run():
 	print("accuracy: ", accuracy)
 	print("\n", confusion_matrix)
 	print("Printing invalid predictions")
-	print(invalid_predictions)
+	print_results(invalid_predictions)
+
 	# print_results(results)
 
 
