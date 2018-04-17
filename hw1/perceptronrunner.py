@@ -4,8 +4,11 @@ import numpy as np
 import time
 
 """
-	save_data method from generalutil is sourced from Andy keene. directory, file, and epoch_results definitions are
-	 also sourced in order to use the save_data method.
+	Permission was granted by the class instructor to share graphing utility methods across projects 
+	in order to grant students the flexibility needed to spend more time investigating experimental results. 
+        To create more time to perform research analysis, a save_data method implemented in generalutil.java
+	is sourced from Andrew keene. Directory, file, and epoch_results definitions are also sourced in order
+	to use the save_data method.
 	https://github.com/andy-keene/ML/blob/master/perceptron/main.py
 """
 
